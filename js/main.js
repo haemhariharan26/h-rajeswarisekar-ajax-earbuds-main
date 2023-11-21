@@ -8,28 +8,34 @@
   const materialList = document.querySelector("#material-list");
 
   const spinner = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect width="6" height="14" x="1" y="4" fill="currentColor"><animate id="svgSpinnersBarsFade0" fill="freeze" attributeName="opacity" begin="0;svgSpinnersBarsFade1.end-0.25s" dur="0.75s" values="1;.2"/></rect><rect width="6" height="14" x="9" y="4" fill="currentColor" opacity=".4"><animate fill="freeze" attributeName="opacity" begin="svgSpinnersBarsFade0.begin+0.15s" dur="0.75s" values="1;.2"/></rect><rect width="6" height="14" x="17" y="4" fill="currentColor" opacity=".3"><animate id="svgSpinnersBarsFade1" fill="freeze" attributeName="opacity" begin="svgSpinnersBarsFade0.begin+0.3s" dur="0.75s" values="1;.2"/></rect></svg>`;
-  // Loader function
-  function showLoader() {
-    model.innerHTML = '<object type="image/svg+xml" data="../images/loader.svg" class="loader"></object>';
-  }
 
-  // User error message function
-  function showError(message) {
-    const errorMessage = document.createElement('p');
-    errorMessage.textContent = message;
-    errorMessage.classList.add('error');
-    document.body.appendChild(errorMessage);
-  }
   //functions
   function modelLoaded() {
     hotspots.forEach(hotspot => {
       hotspot.style.display = "block";
     });
   }
+  // Loading Screen function
+  function loadingScreen() {
+    model.innerHTML = '<object data="../images/spinner.svg" type="image/svg+xml" class="spinner"></object>';
+  }
 
+  function displayError(message) {
+    const errorMessage = document.createElement('p');
+    errorMessage.textContent = message;
+    errorMessage.classList.add('error');
+    const existingError = document.querySelector('.error');
+    if (existingError) {
+      existingError.textContent = message; 
+    } else {
+      document.body.appendChild(errorMessage);
+    }
+  
+    }
+  
   function loadInfoBoxes() {
     // model.innerHTML = spinner;
-    showLoader();
+    loadingScreen();
     fetch("https://swiftpixel.com/earbud/api/infoboxes")
       .then(response => {
         if (!response.ok) {
@@ -38,7 +44,8 @@
         return response.json();
       })
       .then(infoBoxes => {
-        model.innerHTML = ''; // Remove loader
+        //Remove spinner
+        model.innerHTML = ''; 
         console.log(infoBoxes);
         
         infoBoxes.forEach((infoBox, index) => {
@@ -59,20 +66,22 @@
         });
       })
       .catch(error => {
+        // Remove spinner on error
+        model.innerHTML = '';
         console.error(error);
-        model.innerHTML = ''; // Remove loader on error
-        showError("Oops! Something went wrong. Please try again later.");
+        displayError("Apologies, there was an error. Please try again later.");
       });
   }
   loadInfoBoxes();
 
   function loadMaterialsInfo() {
-    showLoader();
+    loadingScreen();
     fetch("https://swiftpixel.com/earbud/api/materials")
       .then(response => response.json())
       .then(materialListData => {
         materialListData.forEach(material => {
-          model.innerHTML = ''; // Remove loader
+          // Remove spinner
+          model.innerHTML = ''; 
           const clone = materialTemplate.content.cloneNode(true);
           const materialHeading = clone.querySelector(".material-description");
           materialHeading.textContent = material.heading;
@@ -84,9 +93,10 @@
         });
       })
       .catch(error => {
+        // Remove spinner on error
+        model.innerHTML = ''; 
         console.error(error);
-        model.innerHTML = ''; // Remove loader on error
-        showError("Oops! Something went wrong fetching materials. Please try again later.");
+        displayError("Sorry, there was an issue retrieving the materials. Please try again later.");
       });
   } 
   loadMaterialsInfo();
